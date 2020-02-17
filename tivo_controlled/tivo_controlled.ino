@@ -19,35 +19,36 @@
 #define D         2701935627
 #define LED_OFF   2701924359
 #define LED_ON    2701940743  
-#define S 
 
-unsigned long val; 
-unsigned long speed = 0;
+const short SPEED_INTERVAL = 75;
+const short MAX_SPEED = 255;
+
+unsigned short currentSpeed = 0;
 unsigned long lastDirection = F;
 
 IRrecv irrecv(RECV_PIN);   //initialization
 decode_results results;   //Define structure type
 
 void accelerate() {
-  speed += 75;
+  currentSpeed += SPEED_INTERVAL;
 
-  if (speed > 255) {
-    speed = 255;
+  if (currentSpeed > MAX_SPEED) {
+    currentSpeed = MAX_SPEED;
   }
   
-  analogWrite(ENA, speed);
-  analogWrite(ENB, speed);
+  analogWrite(ENA, currentSpeed);
+  analogWrite(ENB, currentSpeed);
 }
 
 void deccelerate() {
-  speed -= 75;
+  currentSpeed -= SPEED_INTERVAL;
   
-  if (speed < 0) {
-    speed = 0;
+  if (currentSpeed < 0) {
+    currentSpeed = 0;
   }
   
-  analogWrite(ENA, speed);
-  analogWrite(ENB, speed);
+  analogWrite(ENA, currentSpeed);
+  analogWrite(ENB, currentSpeed);
 }
 
 void leftWheelsForward(){
@@ -124,8 +125,8 @@ void setup() {
 
 void loop() {
   if (irrecv.decode(&results)) { 
-    Serial.println(val);
-    
+    Serial.println(results.value);
+  
     switch (results.value) {
       case A: 
         accelerate();
@@ -154,6 +155,5 @@ void loop() {
     }
     
     irrecv.resume();
-    delay(150);
   }
 }
